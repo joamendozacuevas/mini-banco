@@ -49,6 +49,18 @@ export default function Dashboard({ user, setUser }) {
     setUser(null);
   };
 
+  const eliminarMovimiento = async (id) => {
+    const seguro = window.confirm("¿Eliminar este registro del historial?");
+    if (!seguro) return;
+
+    try {
+      await deleteDoc(doc(db, 'movimientos', id));
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+    }
+  };
+  
+
   const handleTransferSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -158,6 +170,9 @@ export default function Dashboard({ user, setUser }) {
                   <span className="monto">
                     {esEnvio ? '-' : '+'}${mov.monto.toLocaleString('es-CL')}
                   </span>
+                  <button onClick={() => eliminarMovimiento(mov.id)} style={{marginLeft: '10px', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+  🗑️
+</button>
                 </li>
               );
             })}
