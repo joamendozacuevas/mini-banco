@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth, db } from '../firebase/config';
 import { signOut } from 'firebase/auth';
-import { doc, onSnapshot, collection, query, where, getDocs, updateDoc, addDoc, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, getDocs, updateDoc, addDoc, orderBy, deleteDoc } from 'firebase/firestore';
 
 export default function Dashboard({ user, setUser }) {
   const [userData, setUserData] = useState(null);
