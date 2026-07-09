@@ -12,7 +12,8 @@ export default function Dashboard({ user, setUser }) {
   const [monto, setMonto] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+  const [exito, setExito] = useState(''); // Estado para la notificación de éxito
+  
   // Efecto para Saldo en tiempo real (Suscripción 1)
   useEffect(() => {
     const unsubscribeUser = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
@@ -88,9 +89,18 @@ export default function Dashboard({ user, setUser }) {
         tipo: 'transferencia'
       });
 
+      // Limpiamos el formulario
       setMonto('');
       setEmailDestino('');
+      
+      // Mostramos el mensaje de éxito y lo borramos a los 3 segundos
+      setExito(`¡Transferencia de $${montoNum.toLocaleString('es-CL')} enviada con éxito!`);
+      setTimeout(() => {
+        setExito('');
+      }, 3000);
+
     } catch (err) {
+      // Este catch estaba incompleto en tu código
       setError(err.message);
     } finally {
       setLoading(false);
@@ -154,6 +164,13 @@ export default function Dashboard({ user, setUser }) {
           </ul>
         )}
       </section>
+
+      {/* Notificación flotante de éxito */}
+      {exito && (
+        <div className="toast-exito">
+          ✓ {exito}
+        </div>
+      )}
     </div>
   );
 }

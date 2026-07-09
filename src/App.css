@@ -19,3 +19,30 @@ ul { list-style: none; padding: 0; }
 li { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border); }
 .envio .monto { color: var(--danger); }
 .recepcion .monto { color: var(--success); }
+
+/* Notificación Toast (Pop-up de éxito) */
+.toast-exito {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--success);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  z-index: 1000;
+  animation: deslizarArriba 0.4s ease-out forwards;
+}
+
+@keyframes deslizarArriba {
+  from {
+    bottom: -50px;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
