@@ -1,18 +1,52 @@
-# Mini Banco Digital - React + Firebase
+Markdown
+# 🏦 XBank - Evaluación de Testing Unitario
 
-## Instalación y Ejecución
-1. Clonar el repositorio.
-2. Instalar dependencias: `npm install`
-3. Crear un archivo `.env` basado en `.env.example` con las credenciales correspondientes.
-4. Ejecutar el servidor: `npm run dev`
+![Testing Suite](https://github.com/joamendozacuevas/mini-banco/actions/workflows/test.yml/badge.svg)
 
-## Cuentas de Prueba
-- **Usuario 1:** prueba1@banco.cl / pass1234
-- **Usuario 2:** prueba2@banco.cl / pass1234
+Este proyecto es la implementación de pruebas unitarias sobre la plataforma XBank, utilizando **Vitest**, **React Testing Library** y **jsdom**. Se ha aislado por completo la capa de servicios (Firebase) cumpliendo estrictamente con el patrón Arrange-Act-Assert (AAA).
 
-## Modelo de Datos (Firestore)
-- `users/{uid}` -> `{ nombre, email, saldo }`
-- `movimientos/{id}` -> `{ emisorUid, emisorNombre, receptorUid, receptorNombre, monto, fecha, tipo }`
+## 🚀 Cómo ejecutar las pruebas
 
-## Uso de IA
-Se utilizó IA para estructurar el modelo de datos de Firebase, la arquitectura modular de los componentes React (separando responsabilidades entre Auth, Dashboard y Config), y para optimizar las limpiezas de las suscripciones `onSnapshot` de la base de datos para prevenir fugas de memoria.
+Para levantar el entorno de pruebas localmente, ejecuta los siguientes comandos en la terminal:
+
+1. Instalar dependencias:
+   ```bash
+   npm install
+Ejecutar la suite de tests (12 pruebas en total):
+
+Bash
+npm test
+Generar el reporte de cobertura:
+
+Bash
+npm run coverage
+📊 Reporte de Cobertura (Coverage - RT6)
+Se superó con creces el 70% de cobertura de líneas exigido. A continuación, el reporte generado en la última ejecución:
+
+Plaintext
+ % Coverage report from v8
+------------------|---------|----------|---------|---------|-----------------------------------
+All files         |   77.77 |     66.1 |    62.5 |   79.41 |                                   
+ components       |   74.19 |    56.52 |   60.86 |   75.86 |                                   
+  Auth.jsx        |   71.42 |       65 |   66.66 |   74.07 | 28-39,57,77                       
+  Dashboard.jsx   |   75.38 |       50 |   58.82 |   76.66 | 38-39,47-48,52-58,111-115,162-172 
+ firebase         |     100 |      100 |     100 |     100 |                                   
+  config.js       |     100 |      100 |     100 |     100 |                                   
+ utils            |     100 |      100 |     100 |     100 |                                   
+  validaciones.js |     100 |      100 |     100 |     100 |                                   
+------------------|---------|----------|---------|---------|-----------------------------------
+
+🛠️ Refactorización para Testing (RT2)
+Para lograr un código verdaderamente testeable, se aplicó la Separación de Responsabilidades (Separation of Concerns).
+Toda la lógica de validación de transferencias (verificación de saldos, montos negativos, validación de destinatario, etc.) estaba inicialmente acoplada a la interfaz gráfica dentro de Dashboard.jsx.
+
+Esta lógica fue extraída a una función pura llamada validarTransferencia en src/utils/validaciones.js. Esto permitió probar exhaustivamente todas las reglas de negocio (casos borde) sin necesidad de renderizar componentes de React ni lidiar con el DOM.
+
+🤖 Uso de IA en el Desarrollo
+Durante el desarrollo de esta evaluación, se utilizó IA como herramienta de apoyo con los siguientes propósitos:
+
+Configuración de Mocks: Se le solicitó ayuda para estructurar los mocks completos de Firebase (vi.mock('firebase/firestore')) para aislar la capa de servicios y evitar conexiones reales a la base de datos (cumpliendo RT5).
+
+Tests Parametrizados: La IA ayudó a estructurar la sintaxis de it.each para testear las validaciones puras, logrando probar 6 casos distintos de error en un solo bloque de código.
+
+Filtro y Corrección de Bugs (Ejemplo real): Al implementar el test del componente Auth.jsx, se escribió una prueba que esperaba que la función de inicio de sesión de Firebase no fuera llamada si los campos estaban vacíos (expect(auth.signInWithEmailAndPassword).not.toHaveBeenCalled()). El test falló, revelando un bug real en el código original. Gracias a esto, se refactorizó Auth.jsx para incluir validaciones preventivas antes de hacer el submit, y la prueba finalmente pasó en verde.
