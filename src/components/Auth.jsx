@@ -12,8 +12,14 @@ export default function Auth({ setUser }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Evita que la página recargue
+    e.preventDefault();
     setError('');
+
+    // NUEVO: Validación para evitar llamar a Firebase con campos vacíos (Cumple RT4)
+    if (!email.trim() || !password.trim()) {
+      return setError('Todos los campos son obligatorios');
+    }
+
     setLoading(true);
 
     try {
@@ -21,7 +27,6 @@ export default function Auth({ setUser }) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         setUser(userCredential.user);
       } else {
-        // Validar antes de Firebase
         if (!nombre.trim()) throw new Error("El nombre es obligatorio");
         
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -69,7 +74,7 @@ export default function Auth({ setUser }) {
         </button>
       </form>
       {error && <p className="error">{error}</p>}
-      <button className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
+      <button type="button" className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
         {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
       </button>
     </div>

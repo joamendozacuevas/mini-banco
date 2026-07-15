@@ -1,4 +1,3 @@
-// src/components/Dashboard.test.jsx
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -14,7 +13,7 @@ vi.mock('firebase/app', () => ({
 
 // 2. Agregamos getFirestore al mock de base de datos
 vi.mock('firebase/firestore', () => ({
-  getFirestore: vi.fn(), // <-- Esta es la pieza que faltaba
+  getFirestore: vi.fn(), 
   doc: vi.fn(),
   onSnapshot: vi.fn(),
   collection: vi.fn(),
@@ -99,7 +98,7 @@ describe('Dashboard Component', () => {
     await user.type(screen.getByPlaceholderText('Email del destinatario'), 'amigo@banco.cl');
     await user.type(screen.getByPlaceholderText('Monto'), '50000');
     
-// Act
+    // Act
     await user.click(screen.getByRole('button', { name: /enviar dinero/i }));
 
     // Assert: Verificamos llamadas a Firebase y mensaje de éxito (RT5)
@@ -109,17 +108,6 @@ describe('Dashboard Component', () => {
       expect(firestore.addDoc).toHaveBeenCalled(); // Registra historial
       // Buscamos el mensaje de éxito usando una expresión regular para que sea más flexible
       expect(screen.getByText(/¡Transferencia de \$50\.000 enviada con éxito!/i)).toBeInTheDocument();
-    });
-  });
-
-    // Assert: Verificamos que el botón cambia a estado de carga
-    expect(screen.getByRole('button', { name: /transfiriendo/i })).toBeDisabled();
-
-    // Assert: Verificamos llamadas a Firebase (RT5)
-    await waitFor(() => {
-      expect(firestore.updateDoc).toHaveBeenCalledTimes(2); // Descuenta emisor y suma receptor
-      expect(firestore.addDoc).toHaveBeenCalled(); // Registra historial
-      expect(screen.getByText('¡Transferencia de $50.000 enviada con éxito!')).toBeInTheDocument();
     });
   });
 
