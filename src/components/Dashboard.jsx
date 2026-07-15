@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from '../firebase/config';
 import { signOut } from 'firebase/auth';
 import { doc, onSnapshot, collection, query, where, getDocs, updateDoc, addDoc, orderBy, deleteDoc } from 'firebase/firestore';
+import { validarTransferencia } from '../utils/validaciones'; // <-- NUEVO: Importamos la lógica pura
 
 export default function Dashboard({ user, setUser }) {
   const [userData, setUserData] = useState(null);
@@ -12,7 +13,7 @@ export default function Dashboard({ user, setUser }) {
   const [monto, setMonto] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [exito, setExito] = useState(''); // Estado para la notificación de éxito
+  const [exito, setExito] = useState(''); 
   
   // Efecto para Saldo en tiempo real (Suscripción 1)
   useEffect(() => {
@@ -22,13 +23,11 @@ export default function Dashboard({ user, setUser }) {
       }
     });
     
-    // Limpieza de suscripción para evitar memory leaks
     return () => unsubscribeUser();
   }, [user.uid]);
 
   // Efecto para Historial en tiempo real (Suscripción 2)
   useEffect(() => {
-    // Buscamos movimientos donde el usuario sea emisor o receptor
     const q = query(
       collection(db, 'movimientos'),
       orderBy('fecha', 'desc')
@@ -37,7 +36,7 @@ export default function Dashboard({ user, setUser }) {
     const unsubscribeMovs = onSnapshot(q, (snapshot) => {
       const movs = snapshot.docs
         .map(d => ({ id: d.id, ...d.data() }))
-        .filter(m => m.emisorUid === user.uid || m.receptorUid === user.uid); // Filtro local seguro
+        .filter(m => m.emisorUid === user.uid || m.receptorUid === user.uid);
       setMovimientos(movs);
     });
 
@@ -59,19 +58,20 @@ export default function Dashboard({ user, setUser }) {
       console.error("Error al eliminar:", err);
     }
   };
-  
 
   const handleTransferSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
-    const montoNum = Number(monto);
-    // Validaciones antes de tocar Firestore
-    if (montoNum <= 0) return setError('El monto debe ser mayor a 0');
-    if (montoNum > userData.saldo) return setError('Saldo insuficiente');
-    if (emailDestino === user.email) return setError('No puedes transferirte a ti mismo');
+    // NUEVO: Validaciones extraídas antes de tocar Firestore (Cumple RT2)
+    const errorValidacion = validarTransferencia(monto, userData.saldo, emailDestino, user.email);
+    if (errorValidacion) {
+      return setError(errorValidacion);
+    }
 
+    const montoNum = Number(monto);
     setLoading(true);
+
     try {
       // 1. Verificar destinatario
       const qDest = query(collection(db, 'users'), where('email', '==', emailDestino));
@@ -112,7 +112,6 @@ export default function Dashboard({ user, setUser }) {
       }, 3000);
 
     } catch (err) {
-      // Este catch estaba incompleto en tu código
       setError(err.message);
     } finally {
       setLoading(false);
@@ -171,8 +170,8 @@ export default function Dashboard({ user, setUser }) {
                     {esEnvio ? '-' : '+'}${mov.monto.toLocaleString('es-CL')}
                   </span>
                   <button onClick={() => eliminarMovimiento(mov.id)} style={{marginLeft: '10px', background: 'transparent', border: 'none', cursor: 'pointer'}}>
-  🗑️
-</button>
+                    🗑️
+                  </button>
                 </li>
               );
             })}
